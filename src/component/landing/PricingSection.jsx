@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-const PricingSection=({pricingPlans})=>{
+const PricingSection=({pricingPlans,openSignUp})=>{
     return(
         <div className="py-20 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +30,9 @@ const PricingSection=({pricingPlans})=>{
                                     {plan.description}
                                 </p>
                                 <p className="mt-8 ">
-                                    {plan.price}
+                                    <span className="text-4xl font-extrabold text-gray-900">
+                                        {plan.price}
+                                    </span>
                                 </p>
                             </div>
                             <div className="flex-1 flex flex-col justify-between px-6 pt-6 pb-8 bg-gray-50 space-y-0">
@@ -44,6 +46,13 @@ const PricingSection=({pricingPlans})=>{
                                         </li>
                                     ))}
                                 </ul>
+                                <div className="rounded-md shadow">
+                                    <button
+                                    onClick={()=>openSignUp()}
+                                    className={`w-full flex items-center justify-center px-5 py-3 border-transparent text-base font-medium rounded-medium ${plan.highlighted?'text-white bg-purple-500 hover:bg-purple-600':'text-purple-600 bg-white hover:bg-gray-50 border-purple-500'} transition-colors duration-200`}>
+                                        {plan.cta}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}

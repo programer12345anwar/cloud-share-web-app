@@ -47,38 +47,38 @@ export const testimonials = [
     quote: "Our product documentation and files are always accessible and organized — CloudShare made that possible.",
     rating: 5
   },
-  {
-    name: "Arjun Singh",
-    role: "Mobile App Developer",
-    company: "AppSphere",
-    image: "https://randomuser.me/api/portraits/men/37.jpg",
-    quote: "Collaborating on Android builds used to be tough. Now with CloudShare, it’s just drag, drop, and share.",
-    rating: 4
-  },
-  {
-    name: "Kavya Patel",
-    role: "Data Analyst",
-    company: "InsightWorks Analytics",
-    image: "https://randomuser.me/api/portraits/women/22.jpg",
-    quote: "CloudShare helps us securely share dashboards and reports with clients. The process is smooth and reliable.",
-    rating: 5
-  },
-  {
-    name: "Michael Chen",
-    role: "Freelance Designer",
-    company: "Self-employed",
-    image: "https://randomuser.me/api/portraits/men/46.jpg",
-    quote: "As a freelancer, I need to share large design files with clients securely. CloudShare’s simplicity saves my time.",
-    rating: 5
-  },
-  {
-    name: "Priya Sharma",
-    role: "Project Manager",
-    company: "TechSolutions Ltd.",
-    image: "https://randomuser.me/api/portraits/women/65.jpg",
-    quote: "Managing project files across multiple teams used to be a nightmare until we found CloudShare.",
-    rating: 4
-  }
+  // {
+  //   name: "Arjun Singh",
+  //   role: "Mobile App Developer",
+  //   company: "AppSphere",
+  //   image: "https://randomuser.me/api/portraits/men/37.jpg",
+  //   quote: "Collaborating on Android builds used to be tough. Now with CloudShare, it’s just drag, drop, and share.",
+  //   rating: 4
+  // },
+  // {
+  //   name: "Kavya Patel",
+  //   role: "Data Analyst",
+  //   company: "InsightWorks Analytics",
+  //   image: "https://randomuser.me/api/portraits/women/22.jpg",
+  //   quote: "CloudShare helps us securely share dashboards and reports with clients. The process is smooth and reliable.",
+  //   rating: 5
+  // },
+  // {
+  //   name: "Michael Chen",
+  //   role: "Freelance Designer",
+  //   company: "Self-employed",
+  //   image: "https://randomuser.me/api/portraits/men/46.jpg",
+  //   quote: "As a freelancer, I need to share large design files with clients securely. CloudShare’s simplicity saves my time.",
+  //   rating: 5
+  // },
+  // {
+  //   name: "Priya Sharma",
+  //   role: "Project Manager",
+  //   company: "TechSolutions Ltd.",
+  //   image: "https://randomuser.me/api/portraits/women/65.jpg",
+  //   quote: "Managing project files across multiple teams used to be a nightmare until we found CloudShare.",
+  //   rating: 4
+//   }
 ];
 
 
@@ -135,6 +135,7 @@ export const pricingPlans = [
       "7-day file retention",
       "Email support",
     ],
+    cta: "Get Started",
   },
   {
     name: "Premium",
@@ -148,6 +149,7 @@ export const pricingPlans = [
       "Priority email support",
       "File analytics",
     ],
+    cta: "Go Premium",
   },
   {
     name: "Ultimate",
@@ -162,6 +164,6 @@ export const pricingPlans = [
       "Advanced analytics",
       "API access",
     ],
+    cta: "Go Ultimate", 
   },
 ];
-

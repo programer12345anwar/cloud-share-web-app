@@ -8,9 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
-    
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.53.3",
     "@tailwindcss/vite": "^4.1.16",
     "axios": "^1.12.2",
     "lucide-react": "^0.548.0",

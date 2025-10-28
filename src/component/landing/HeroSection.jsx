@@ -1,6 +1,7 @@
 import { assets } from "../../assets/assets";
 
-const HeroSection=()=>{
+
+const HeroSection=({ openSignIn, openSignUp })=>{
     return(
         <div className="landing-page-content relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-indigo-50 opacity-80 z-0 pointer-evenmts-none"></div>
@@ -16,8 +17,12 @@ const HeroSection=()=>{
                         </p>
                         <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
                             <div className="space-y-4 sm:space-y-0 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5">
-                                <button className="flex items-center px-6 py-3 border-transparent text-base font-medium rounded-md text-white bg-purple-500 hover:bg-purple-600 md:py-4 md:text-lg md:px-10 transition-all duration-200 shadow-lg hover:shadow-xl">Get Started</button>
-                                <button className="flex items-center justify-center px-6 py-3 border border-transparent text text-gray-700 bg-white text-base font-medium rounded-md text-black  hover:bg-gray-50 md:py-4 md:text-lg md:px-10 transition-all duration-200 shadow-lg hover:shadow-xl">Sign In</button>
+                                <button 
+                                    onClick={()=>openSignUp()}
+                                className="flex items-center px-6 py-3 border-transparent text-base font-medium rounded-md text-white bg-purple-500 hover:bg-purple-600 md:py-4 md:text-lg md:px-10 transition-all duration-200 shadow-lg hover:shadow-xl">Get Started</button>
+                                <button
+                                    onClick={()=>openSignIn()}
+                                className="flex items-center justify-center px-6 py-3 border border-transparent text text-gray-700 bg-white text-base font-medium rounded-md text-black  hover:bg-gray-50 md:py-4 md:text-lg md:px-10 transition-all duration-200 shadow-lg hover:shadow-xl">Sign In</button>
                             </div>
                         </div>
                     </div>
@@ -32,7 +37,7 @@ const HeroSection=()=>{
                     </div>
                 </div>
                 <div className="mt-8 text-center">
-                    <p className="mt-4 text-base text-gray-500">
+                    <p className="mt-2 mb-4 text-base text-gray-500">
                         All your files are encrypted and stored securely with enterprise-grade security protocols.
                     </p>
                 </div>
