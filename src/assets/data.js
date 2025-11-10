@@ -1,3 +1,5 @@
+import { CreditCard, Files, LayoutDashboard, Receipt, Upload } from "lucide-react";
+
 export const testimonials = [
   {
     name: "Aarav Mehta",
@@ -166,4 +168,37 @@ export const pricingPlans = [
     ],
     cta: "Go Ultimate", 
   },
+];
+
+export const SIDE_MENU_DATA = [
+  {
+    id: "01",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/dashboard",
+  },
+  {
+    id: "02",
+    label: "Upload",
+    icon: Upload,
+    path: "/upload",
+  },
+  {
+    id: "03",
+    label: "My Files",
+    icon: Files,
+    path: "/my-files",
+  },
+  {
+    id: "04",
+    label: "Subscription",
+    icon: CreditCard,
+    path: "/subscription",
+  },
+  {
+    id: "05",
+    label: "Transactions",
+    icon: Receipt,
+    path: "/transactions",
+  }
 ];
