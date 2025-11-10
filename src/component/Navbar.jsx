@@ -3,8 +3,9 @@ import { Menu,Share2,Wallet,X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import SideMenu from "./SideMenu";
+import CreditsDisplay from "./CreditsDisplay";
 
-const Navbar=()=>{
+const Navbar=({activeMenu})=>{
     const [openSideMenu,setOpenSideMenu]=useState(false);
     return(
         <div className="flex items-center justify-between gap-5 bg-white border border-b border-gray-200/50 backdrop-blur-[2px] py-4 px-4 sm:px-7 sticky top-0 z-30">
@@ -32,7 +33,7 @@ const Navbar=()=>{
             <SignedIn>
                 <div className="flex items-center gap-4">
                 <Link to="/subscription">
-                    <Wallet/>
+                    <CreditsDisplay credits={5}/>
                 </Link>
                 <div className="relative">
                     <UserButton/>
@@ -43,7 +44,7 @@ const Navbar=()=>{
             {openSideMenu && (
                 <div className="fixed top-[73px] left-0 right-0 border-b border-gray-200 lg:hidden z-20">
                     {/* side menu bar */}
-                    <SideMenu/>
+                    <SideMenu activeMenu={activeMenu}/>
                 </div>
             )}
         </div>
