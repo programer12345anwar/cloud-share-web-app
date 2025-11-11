@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
-import { Copy, Download, Eye, File, Globe, Grid, List, Lock, Trash2 } from "lucide-react";
+import { Copy, Download, Eye, File, Globe, Grid, List, Lock, Trash2, Image, VideoIcon, Music, FileText, FileIcon  } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
 import FileCard from "../component/FileCard";
+import { apiEndpoints } from "../util/ApiEndpoints";
 
 const MyFiles=()=>{
     const [files,setFiles]=useState([]);
@@ -14,11 +15,11 @@ const MyFiles=()=>{
     const navigate=useNavigate();
 
 
+    //fetching the files for a logedIn user
     const fetchFiles=async ()=>{
         try {
         const token = await getToken();
-        const response = await axios.get(
-        "http://localhost:9000/api/v1.0/files/my",
+        const response = await axios.get(apiEndpoints.FETCH_FILES,
         { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.status === 200) {
@@ -31,10 +32,45 @@ const MyFiles=()=>{
         }
     }
 
+    //Toggles the public/private status of a file
+    const togglePublic = async (fileToUpdate)=>{
+        try{
+            const token=await getToken();
+            await axios.patch(apiEndpoints.TOGGLE_FILE
+                (fileToUpdate.id),{},{headers:{Authorization: `Bearer ${token}`}});
+            setFiles(files.map((file)=>file.id===fileToUpdate.id ? {...file,isPublic:!file.isPublic}: file))
+        }catch (error){
+            console.error('Error toggling file status',error);
+            toast.error('Error toggling file status: ',error.message);
+        }
+    }
+
     useEffect(()=>{
         fetchFiles();
     },[getToken]);
 
+
+    const getFileIcon = (file) => {
+        const extension = file.name.split('.').pop().toLowerCase();
+        
+        if(['jpg','png','jpeg','gif','svg','webp'].includes(extension)){
+            return <Image size={24} className="text-purple-500"/>
+        }
+
+        if(['mp4','webm','mov','avi','mkv'].includes(extension)){
+            return <VideoIcon size={24} className="text-blue-500"/>
+        }
+
+        if(['mp3','wav','ogg','flac','m4a'].includes(extension)){
+            return <Music size={24} className="text-green-500"/>
+        }
+
+        if(['pdf','doc','docx','txt','rtf'].includes(extension)){
+            return <FileText size={24} className="text-amber-500"/>
+        }
+
+        return <FileIcon size={24} className="text-purple-500"/>
+    };
 
     return(
         <DashboardLayout activeMenu="My Files">
@@ -102,7 +138,7 @@ const MyFiles=()=>{
                                     <tr key={file.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                                             <div className="flex items-center gap-2">
-                                                <File size={20} className="text-blue-600"/>
+                                                {getFileIcon(file)}
                                                 {file.name}
                                             </div>
                                         </td>
@@ -114,7 +150,9 @@ const MyFiles=()=>{
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-grap-600">
                                             <div className="flex items-center gap-4">
-                                                <button className="flex items-center gap-2 cursor-pointer group">
+                                                <button 
+                                                onClick={()=>togglePublic(file)}
+                                                className="flex items-center gap-2 cursor-pointer group">
                                                     {file.isPublic ? (
                                                         <>
                                                         <Globe size={16} className="text-green-500"/>
@@ -158,9 +196,9 @@ const MyFiles=()=>{
                                                 </div>
                                                 <div className="flex justify-center">
                                                     {file.isPublic ? (
-                                                        <Link to={`/file/${file.id}`} className="text-gray-500 hover:text-blue-600">
+                                                        <a href={`/file/${file.id}`} title="View File" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-600">
                                                             <Eye size={18}/>
-                                                        </Link>
+                                                        </a>
                                                     ):(
                                                         <span className="w-[18px]">
                                                             

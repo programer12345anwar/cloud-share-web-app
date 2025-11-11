@@ -1,10 +1,10 @@
-import { FileIcon, FileText, Globe, Image, Music, VideoIcon } from "lucide-react";
+import { FileIcon, FileText, Globe, Image, Music, VideoIcon,Lock, Copy, Eye, Download, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 const FileCard = ({ file }) => {
     const [showActions, setShowActions] = useState(false);
 
-    const getFileIcon = () => {
+    const getFileIcon = (file) => {
         const extension = file.name.split('.').pop().toLowerCase();
         
         if(['jpg','png','jpeg','gif','svg','webp'].includes(extension)){
@@ -27,7 +27,7 @@ const FileCard = ({ file }) => {
     };
 
     const formatFileSize=(bytes)=>{
-        if(bytes<1024) return bytes + '  B';
+        if(bytes<1024) return bytes + ' B';
         else if(bytes<1048576) return (bytes/1024).toFixed(1) + ' KB';
         else return (bytes/1048576).toFixed(1) + ' MB';
     }
@@ -46,7 +46,7 @@ const FileCard = ({ file }) => {
             {/* File preview area */}
 
             <div className="h-32 bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-4">
-                {getFileIcon()}
+                {getFileIcon(file)}
             </div>
 
             {/* public/private badge */}
@@ -72,6 +72,44 @@ const FileCard = ({ file }) => {
                         </p>
                     </div>
                 </div>
+            </div>
+
+            {/* action button */}
+
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-end justify-center p-4 transition-opacity duration-300 ${showActions ? 'opacity-100':'opacity-0'}`}>
+                    <div className="flex gap-3 w-full justify-center">
+                        {file.isPublic && (
+                            <button 
+                            title="Share Link"
+                            className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors text-purple-500 hover:text-purple-600">
+                                <Copy size={18}/>
+                            </button>
+                        )}
+
+                        {file.isPublic && (
+                            <a href={`/file/${file.id}`} title="View File" target="_blank" rel="nonreferrer" className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors text-gray-700 hover: text-gray-900">
+                                <Eye size={18}/>
+                            </a>
+                        )}
+
+                        <button
+                        title="Download"
+                        className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors cursor-pointer text-green-600 hover:text-green-700">
+                            <Download size={18}/>
+                        </button>
+
+                        <button
+                        title={file.isPublic ? "Make Private": "Make Public"}
+                        className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors cursor-pointer text-amber-600 hover:text-amber-700">
+                            {file.isPublic ? <Lock size={18}/> : <Globe size={18}/>}
+                        </button>
+
+                        <button
+                        title="Delete"
+                        className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-red-600 hover:text-red-700">
+                        <Trash2 size={18}/>
+                        </button>
+                    </div>
             </div>
             
         </div>
