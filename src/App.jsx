@@ -7,10 +7,14 @@ import Subscription from "./pages/Subscription";
 import Transaction from "./pages/Transaction";
 import Upload from "./pages/Upload";
 import { RedirectToSignIn, SignedOut, SignedIn } from "@clerk/clerk-react";
+import { Toaster } from "react-hot-toast";
+
 
 const App = () => {
   return (
     <BrowserRouter>
+      <Toaster
+      />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route
