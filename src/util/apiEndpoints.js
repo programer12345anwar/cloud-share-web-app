@@ -1,6 +1,8 @@
-const BASE_URL="http://localhost:9000/api/v1.0"
+const BASE_URL = "http://localhost:9000/api/v1.0";
 
-export const apiEndpoints={
-    FETCH_FILES:`${BASE_URL}/files/my`,
-    TOGGLE_FILE:`${BASE_URL}/files/${id}/toggle-public`
-}
+export const apiEndpoints = {
+    FETCH_FILES: `${BASE_URL}/files/my`,
+    TOGGLE_FILE: (id) => `${BASE_URL}/files/${id}/toggle-public`,
+    DOWNLOAD_FILE: (id) => `${BASE_URL}/files/download/${id}`,
+    DELETE_FILE:(id)=>`${BASE_URL}/files/${id}`,
+};
