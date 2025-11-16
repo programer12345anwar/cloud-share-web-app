@@ -8,10 +8,13 @@ import Transaction from "./pages/Transaction";
 import Upload from "./pages/Upload";
 import { RedirectToSignIn, SignedOut, SignedIn } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
+import { UserCreditsProvider } from "./context/UserCreditsContext";
+
 
 
 const App = () => {
   return (
+    <UserCreditsProvider>
     <BrowserRouter>
       <Toaster
       />
@@ -63,7 +66,7 @@ const App = () => {
           }
         />
         <Route
-          path="/subscriptions"
+          path="/subscription"
           element={
             <>
               <SignedIn>
@@ -95,6 +98,7 @@ const App = () => {
         <Route path="/*" element={<RedirectToSignIn />} />
       </Routes>
     </BrowserRouter>
+    </UserCreditsProvider>
   );
 };
 

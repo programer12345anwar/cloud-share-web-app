@@ -210,7 +210,10 @@ const MyFiles=()=>{
                             <FileCard 
                             key={file.id}
                             file={file}
-                            
+                            onDelete={openDeleteConfirmation}
+                            onTogglePublic={togglePublic}
+                            onDownload={handleDownload}
+                            onShareLink={openShareModal}
                             />
                         ))}
                     </div>
