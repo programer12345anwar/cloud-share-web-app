@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { createContext, useCallback, useEffect, useState } from "react";
-import { apiEndpoints } from "../util/ApiEndpoints";
+import { apiEndpoints } from "../util/apiEndpoints";
 import toast from "react-hot-toast";
 
 export const UserCreditsContext = createContext();

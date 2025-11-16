@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { UserCreditsContext } from "../context/UserCreditsContext";
 import { AlertCircle } from "lucide-react";
 import UploadBox from "../component/UploadBox";
-import { apiEndpoints } from "../util/ApiEndpoints";
+import { apiEndpoints } from "../util/apiEndpoints";
 import toast from "react-hot-toast";
 import axios from "axios";  
 

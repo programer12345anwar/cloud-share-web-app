@@ -3,7 +3,7 @@ import DashboardLayout from "../layout/DashboardLayout";
 import { useAuth } from "@clerk/clerk-react";
 import { UserCreditsContext } from "../context/UserCreditsContext";
 import axios from "axios";
-import { apiEndpoints } from "../util/ApiEndpoints";
+import { apiEndpoints } from "../util/apiEndpoints";
 import { AlertCircle, Check, CreditCard, Loader2 } from "lucide-react";
 
 const Subscription = () => {
