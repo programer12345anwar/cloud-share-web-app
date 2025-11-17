@@ -39,6 +39,8 @@ const Upload = () => {
         setMessageType("");
     };
 
+    //Handle file upload
+
     const handleUpload = async () => {
         if (files.length === 0) {
         setMessage("Please select at least one file.");
