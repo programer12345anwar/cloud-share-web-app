@@ -3,6 +3,12 @@
 A secure cloud-based file sharing platform that enables users to upload, store, manage, and share files seamlessly.
 Built using Spring Boot + React + Microservices architecture, this application integrates Clerk Authentication, JWT security, Razorpay payments, and Swagger API documentation.
 
+
+ <img width="1920" height="400" alt="screencapture-localhost-5173-my-files-2025-12-01-19_04_58" src="https://github.com/user-attachments/assets/726e9786-02cb-42c4-b38f-a28d5cbb6cae" />
+ <img width="1920" height="900" alt="screencapture-localhost-9000-api-v1-0-swagger-ui-index-html-2025-12-01-19_07_54" src="https://github.com/user-attachments/assets/8159ff06-2d54-495b-a3e9-67e2e035ce71" />
+
+
+
 📂 Repositories
 🔹 Backend
 
@@ -12,8 +18,11 @@ Built using Spring Boot + React + Microservices architecture, this application i
 
 🔗 https://github.com/programer12345anwar/cloud-share-web-app
 
+
+
 🚀 Key Features
 ✅ Authentication & Security
+
 
 Clerk authentication (Frontend)
 
@@ -24,6 +33,7 @@ Secure API access
 Token validation & request filtering
 
 Role-based access (optional)
+
 
 ✅ File Management
 
@@ -37,6 +47,7 @@ Cloud-based file storage
 
 Metadata handling
 
+
 ✅ Payment Integration
 
 Razorpay payment gateway
@@ -47,6 +58,7 @@ Payment verification APIs
 
 Secure transaction handling
 
+
 ✅ API Management
 
 Swagger & OpenAPI documentation
@@ -54,6 +66,7 @@ Swagger & OpenAPI documentation
 Versioned REST APIs
 
 Clean controller architecture
+
 
 ✅ Architecture
 
@@ -98,10 +111,12 @@ Razorpay Checkout UI
 
 Responsive design
 
+
 🔧 Backend Setup
 ✅ Clone Repository
 git clone https://github.com/programer12345anwar/cloud-share-backend.git
 cd cloud-share-backend
+
 
 ✅ Create .env file
 
@@ -164,12 +179,15 @@ cloud-share-backend
  ┗ utils
 
 Frontend
-cloud-share-web-app
- ┣ src
- ┣ pages
- ┣ components
- ┣ services
- ┗ App.jsx
+src
+ ├─ assets
+ ├─ component
+ ├─ context
+ ├─ layout
+ ├─ pages
+ ├─ util
+ └─ App.jsx
+
 
 📌 Future Enhancements
 
@@ -183,15 +201,13 @@ AI-based content tagging
 
 Email notifications
 
-Shareable file links
-
 File expiry system
 
 🧑‍💻 Author
 
-MD Anwar Alam
+Md Anwar Alam
 Java Backend Developer
-Spring Boot | Microservices | JWT | REST | Razorpay | Clerk | PostgreSQL
+Spring Boot | Microservices | JWT | REST | Razorpay | Clerk | PostgreSQL, Mongodb, Mysql | Hibernate | React
 📍 India
 
 📜 License
