@@ -1,16 +1,207 @@
-# React + Vite
+☁️ Cloud-Share Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A secure cloud-based file sharing platform that enables users to upload, store, manage, and share files seamlessly.
+Built using Spring Boot + React + Microservices architecture, this application integrates Clerk Authentication, JWT security, Razorpay payments, and Swagger API documentation.
 
-Currently, two official plugins are available:
+📂 Repositories
+🔹 Backend
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🔗 https://github.com/programer12345anwar/cloud-share-backend
 
-## React Compiler
+🔹 Frontend
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🔗 https://github.com/programer12345anwar/cloud-share-web-app
 
-## Expanding the ESLint configuration
+🚀 Key Features
+✅ Authentication & Security
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Clerk authentication (Frontend)
+
+JWT-based authentication (Backend)
+
+Secure API access
+
+Token validation & request filtering
+
+Role-based access (optional)
+
+✅ File Management
+
+Upload files securely
+
+Download shared files
+
+Manage user files
+
+Cloud-based file storage
+
+Metadata handling
+
+✅ Payment Integration
+
+Razorpay payment gateway
+
+Subscription / premium user support
+
+Payment verification APIs
+
+Secure transaction handling
+
+✅ API Management
+
+Swagger & OpenAPI documentation
+
+Versioned REST APIs
+
+Clean controller architecture
+
+✅ Architecture
+
+Modular backend structure
+
+Stateless APIs
+
+Separation of concerns
+
+Scalable design approach
+
+🛠️ Tech Stack
+Backend
+
+Java
+
+Spring Boot
+
+JWT Authentication
+
+Razorpay API
+
+Swagger (OpenAPI)
+
+MongoDB
+
+Maven
+
+REST Architecture
+
+Frontend
+
+React.js
+
+Clerk Authentication
+
+Tailwind / CSS
+
+Axios
+
+Razorpay Checkout UI
+
+Responsive design
+
+🔧 Backend Setup
+✅ Clone Repository
+git clone https://github.com/programer12345anwar/cloud-share-backend.git
+cd cloud-share-backend
+
+✅ Create .env file
+
+Create a .env file in backend root directory:
+
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+
+✅ Run Backend
+mvn spring-boot:run
+
+✅ Swagger Documentation
+
+Once server is running, open:
+
+http://localhost:8080/swagger-ui.html
+
+🎨 Frontend Setup
+✅ Clone Repository
+git clone https://github.com/programer12345anwar/cloud-share-web-app.git
+cd cloud-share-web-app
+
+✅ Install Dependencies
+npm install
+
+✅ Start Frontend Server
+npm start
+
+🌐 Application Flow
+User → Clerk Auth (Frontend)
+     → JWT Token Issued
+     → Backend APIs
+     → File Services + DB
+     → Razorpay Payments
+     → Secure File Access
+
+🔐 Security Practices
+
+Authentication handled by Clerk
+
+Authorization via JWT
+
+Environment-based secret management
+
+Token filtering middleware
+
+Payment validation on server-side
+
+Swagger protected endpoints
+
+📁 Project Structure
+Backend
+cloud-share-backend
+ ┣ controller
+ ┣ services
+ ┣ repositories
+ ┣ models
+ ┣ config
+ ┣ security
+ ┗ utils
+
+Frontend
+cloud-share-web-app
+ ┣ src
+ ┣ pages
+ ┣ components
+ ┣ services
+ ┗ App.jsx
+
+📌 Future Enhancements
+
+Admin dashboard
+
+File search and filtering
+
+Cloud provider integration
+
+AI-based content tagging
+
+Email notifications
+
+Shareable file links
+
+File expiry system
+
+🧑‍💻 Author
+
+MD Anwar Alam
+Java Backend Developer
+Spring Boot | Microservices | JWT | REST | Razorpay | Clerk | PostgreSQL
+📍 India
+
+📜 License
+
+This project is open-source for educational and personal use.
+
+⭐ Support
+
+If you like this project:
+
+⭐ Star the repo
+📢 Share it
+🚀 Follow for more projects
