@@ -113,29 +113,41 @@ const MyFiles=()=>{
     };
 
 
-    //delete a file after confirmation
+    //Fast delete with dialog - Optimistic UI update
     const handleDelete = async () => {
-    const fileId = deleteConfirmation.fileId;
-    if (!fileId) return;
+        const fileId = deleteConfirmation.fileId;
+        if (!fileId) return;
 
-    try {
-        const token = await getToken();
-        const response = await axios.delete(
-        apiEndpoints.DELETE_FILE(fileId),
-        { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (response.status === 204 || response.status === 200) {
-        setFiles(files.filter((file) => file.id !== fileId));
-        toast.success("File deleted successfully");
+        // Store the deleted file in case we need to restore
+        const deletedFile = files.find(f => f.id === fileId);
+        
+        // Close dialog immediately for instant feedback
         closeDeleteConfirmation();
-        } else {
-        toast.error("Error deleting the file");
+        
+        // Optimistic update - remove from UI immediately
+        setFiles(files.filter((file) => file.id !== fileId));
+        
+        // Show success toast immediately
+        toast.success("File deleted successfully");
+
+        // API call in background - restore if it fails
+        try {
+            const token = await getToken();
+            await axios.delete(
+                apiEndpoints.DELETE_FILE(fileId),
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+        } catch (error) {
+            // Restore file if API call fails
+            if (deletedFile) {
+                setFiles(prev => [...prev, deletedFile].sort((a, b) => 
+                    new Date(b.uploadedAt) - new Date(a.uploadedAt)
+                ));
+            }
+            toast.error("Failed to delete file. File restored.");
+            console.error("Error deleting the file", error);
         }
-    } catch (error) {
-        console.error("Error deleting the file", error);
-        toast.error("Error deleting the file: " + error.message);
-    }
+    };
     };
 
 
@@ -320,7 +332,7 @@ const MyFiles=()=>{
                 isOpen={deleteConfirmation.isOpen}
                 onClose={closeDeleteConfirmation}
                 title="Delete File"
-                message="Are you sure want to delete this file? This action cannot be undone."
+                message="Are you sure you want to delete this file? This action cannot be undone."
                 confirmText="Delete"
                 cancelText="Cancel"
                 onConfirm={handleDelete}
