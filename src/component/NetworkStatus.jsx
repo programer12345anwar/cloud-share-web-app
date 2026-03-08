@@ -1,31 +1,27 @@
 import { useEffect, useState } from "react";
-import { Wifi, WifiOff } from "lucide-react";
-import { checkBackendHealth } from "../util/apiClient";
+import { WifiOff } from "lucide-react";
+import { isBackendDown, resetErrorCounter } from "../util/apiClient";
 
 const NetworkStatus = () => {
-  const [backendStatus, setBackendStatus] = useState("checking"); // 'checking', 'healthy', 'down'
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        await checkBackendHealth();
-        setBackendStatus("healthy");
-        setShowBanner(false);
-      } catch (error) {
-        setBackendStatus("down");
+    // Check backend status every 5 seconds
+    const checkStatus = setInterval(() => {
+      if (isBackendDown()) {
         setShowBanner(true);
+      } else {
+        setShowBanner(false);
       }
-    };
+    }, 5000);
 
-    // Check on mount
-    checkHealth();
-
-    // Check every 30 seconds
-    const interval = setInterval(checkHealth, 30000);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(checkStatus);
   }, []);
+
+  const handleRefresh = () => {
+    resetErrorCounter();
+    window.location.reload();
+  };
 
   if (!showBanner) {
     return null;
@@ -39,12 +35,13 @@ const NetworkStatus = () => {
           <div>
             <p className="font-semibold">Server Connection Issue</p>
             <p className="text-sm text-red-100">
-              Unable to reach our servers. Some features may be unavailable. Please refresh the page.
+              Unable to reach our servers. Some features may be unavailable.
+              Please refresh the page.
             </p>
           </div>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={handleRefresh}
           className="bg-white text-red-600 px-4 py-2 rounded font-medium text-sm hover:bg-red-50 transition whitespace-nowrap flex-shrink-0"
         >
           Refresh

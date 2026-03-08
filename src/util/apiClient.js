@@ -1,6 +1,9 @@
 import axios from "axios";
 import { apiEndpoints } from "./apiEndpoints";
 
+let networkErrorCount = 0;
+const MAX_NETWORK_ERRORS = 3; // Show banner only after multiple failures
+
 // Create axios instance with timeout
 export const apiClient = axios.create({
   timeout: 10000, // 10 second timeout
@@ -8,7 +11,11 @@ export const apiClient = axios.create({
 
 // Response interceptor for global error handling
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Reset error count on successful request
+    networkErrorCount = 0;
+    return response;
+  },
   (error) => {
     const errorMessage = {
       status: null,
@@ -17,16 +24,18 @@ apiClient.interceptors.response.use(
     };
 
     if (!error.response) {
-      // Network error or timeout
+      // Network error or timeout - increment counter
+      networkErrorCount++;
       errorMessage.isNetworkError = true;
       errorMessage.message =
         error.message === "Network Error"
           ? "Network error - Please check your internet connection and try again"
           : error.code === "ECONNABORTED"
-          ? "Request timeout - The server is taking too long to respond"
-          : "Backend server is unreachable. Please try again later.";
+            ? "Request timeout - The server is taking too long to respond"
+            : "Backend server is unreachable. Please try again later.";
     } else {
-      // Server responded with error status
+      // Server responded with error status - reset counter
+      networkErrorCount = 0;
       errorMessage.status = error.response.status;
       errorMessage.message =
         error.response.data?.message ||
@@ -34,19 +43,17 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(errorMessage);
-  }
+  },
 );
 
-// Check backend health
-export const checkBackendHealth = async () => {
-  try {
-    const response = await apiClient.get(
-      `${apiEndpoints.UPLOAD_FILE.split("/files")[0]}/health`
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+// Check if backend is truly unreachable
+export const isBackendDown = () => {
+  return networkErrorCount >= MAX_NETWORK_ERRORS;
+};
+
+// Reset error counter
+export const resetErrorCounter = () => {
+  networkErrorCount = 0;
 };
 
 export default apiClient;
