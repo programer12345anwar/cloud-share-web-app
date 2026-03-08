@@ -10,16 +10,19 @@ import PublicFileView from "./pages/PublicFileView";
 import { RedirectToSignIn, SignedOut, SignedIn } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
 import { UserCreditsProvider } from "./context/UserCreditsContext";
+import ErrorBoundary from "./component/ErrorBoundary";
+import NetworkStatus from "./component/NetworkStatus";
 
 
 
 const App = () => {
   return (
-    <UserCreditsProvider>
-    <BrowserRouter>
-      <Toaster
-      />
-      <Routes>
+    <ErrorBoundary>
+      <UserCreditsProvider>
+        <BrowserRouter>
+          <NetworkStatus />
+          <Toaster />
+          <Routes>
         <Route path="/" element={<Landing />} />
         <Route
           path="/dashboard"
@@ -103,9 +106,10 @@ const App = () => {
           </>
         }></Route>
         <Route path="/*" element={<RedirectToSignIn />} />
-      </Routes>
-    </BrowserRouter>
-    </UserCreditsProvider>
+          </Routes>
+        </BrowserRouter>
+      </UserCreditsProvider>
+    </ErrorBoundary>
   );
 };
 
