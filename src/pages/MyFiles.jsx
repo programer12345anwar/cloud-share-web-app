@@ -148,7 +148,6 @@ const MyFiles=()=>{
             console.error("Error deleting the file", error);
         }
     };
-    };
 
 
     useEffect(()=>{

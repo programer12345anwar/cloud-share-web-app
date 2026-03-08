@@ -10,6 +10,8 @@ const PublicFileView = () => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [fileContent, setFileContent] = useState(null);
+    const [contentLoading, setContentLoading] = useState(false);
 
     const [shareMode, setShareMode] = useState({
         isOpen: false,
@@ -27,6 +29,9 @@ const PublicFileView = () => {
                 const res = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId));
                 setFile(res.data);
                 setError(null);
+                
+                // Load file content for preview
+                loadFileContent(res.data);
             } catch (error) {
                 console.error("Error fetching file:", error);
                 setError("Could not retrieve the file. It may be invalid or removed.");
@@ -36,7 +41,52 @@ const PublicFileView = () => {
         };
 
         getFile();
+
+        // Cleanup image URL on unmount
+        return () => {
+            if (fileContent?.type === 'image' && fileContent?.url) {
+                window.URL.revokeObjectURL(fileContent.url);
+            }
+        };
     }, [fileId]);
+
+    // Function to check if file type is previewable
+    const isPreviewable = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        const textTypes = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'py', 'java', 'sql', 'md'];
+        const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+        return [...textTypes, ...imageTypes].includes(extension);
+    };
+
+    // Load file content for preview
+    const loadFileContent = async (fileData) => {
+        if (!isPreviewable(fileData.name)) return;
+
+        try {
+            setContentLoading(true);
+            const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileId), {
+                responseType: "blob",
+            });
+
+            const extension = fileData.name.split('.').pop().toLowerCase();
+            const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+
+            if (imageTypes.includes(extension)) {
+                // For images, create object URL
+                const url = window.URL.createObjectURL(response.data);
+                setFileContent({ type: 'image', url });
+            } else {
+                // For text files, read as text
+                const text = await response.data.text();
+                setFileContent({ type: 'text', content: text });
+            }
+        } catch (error) {
+            console.error("Error loading file content:", error);
+            setFileContent(null);
+        } finally {
+            setContentLoading(false);
+        }
+    };
 
     // Handle download
     const handleDownload = async () => {
@@ -150,6 +200,34 @@ const PublicFileView = () => {
                                 Download File
                             </button>
                         </div>
+
+                        {/* File Preview Section */}
+                        {isPreviewable(file.name) && contentLoading ? (
+                            <div className="my-5 p-4 bg-gray-100 rounded flex items-center justify-center">
+                                <p className="text-gray-600">Loading preview...</p>
+                            </div>
+                        ) : fileContent ? (
+                            <div className="my-5 border-t pt-5">
+                                <h3 className="text-base font-semibold text-left text-gray-800 mb-3">
+                                    File Preview
+                                </h3>
+                                {fileContent.type === 'image' ? (
+                                    <div className="flex justify-center bg-gray-100 rounded p-4">
+                                        <img 
+                                            src={fileContent.url} 
+                                            alt={file.name}
+                                            className="max-w-full max-h-96 rounded"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="bg-gray-900 text-gray-100 rounded p-4 overflow-auto max-h-96">
+                                        <pre className="text-sm font-mono whitespace-pre-wrap break-words">
+                                            {fileContent.content}
+                                        </pre>
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
 
                         <hr className="my-5" />
 
