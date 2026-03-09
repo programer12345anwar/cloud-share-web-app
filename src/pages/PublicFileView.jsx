@@ -1,550 +1,380 @@
-import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { apiEndpoints } from "../util/apiEndpoints";
-import { Copy, Download, File, Info, Share2 } from "lucide-react";
-import LinkShareModal from "../component/LinkShareModal";
-import { useParams } from "react-router-dom"; // ✅ FIXED
+import { Download, AlertCircle, FileText, Copy, Share2 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 const PublicFileView = () => {
-    const [file, setFile] = useState(null);
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [fileContent, setFileContent] = useState(null);
-    const [contentLoading, setContentLoading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
-    const [shareMode, setShareMode] = useState({
-        isOpen: false,
-        link: ""
-    });
+  const { fileId } = useParams();
 
-    const { fileId } = useParams();
-    const { getToken } = useAuth();
-
-    useEffect(() => {
-        const getFile = async () => {
-            try {
-                setIsLoading(true);
-
-                const res = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId));
-                setFile(res.data);
-                setError(null);
-                
-                // Load file content for preview
-                loadFileContent(res.data);
-            } catch (error) {
-                console.error("Error fetching file:", error);
-                setError("Could not retrieve the file. It may be invalid or removed.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        getFile();
-
-        // Cleanup image URL on unmount
-        return () => {
-            if (fileContent?.type === 'image' && fileContent?.url) {
-                window.URL.revokeObjectURL(fileContent.url);
-            }
-        };
-    }, [fileId]);
-
-    // Function to check if file type is previewable
-    const isPreviewable = (fileName) => {
-        const extension = fileName.split('.').pop().toLowerCase();
-        const textTypes = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'py', 'java', 'sql', 'md'];
-        const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-        return [...textTypes, ...imageTypes].includes(extension);
+  useEffect(() => {
+    const getFile = async () => {
+      try {
+        setIsLoading(true);
+        const res = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId));
+        console.log("Full file response:", res.data);
+        setFile(res.data);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching file:", error);
+        setError("Could not retrieve the file. It may be invalid or removed.");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    // Load file content for preview
-    const loadFileContent = async (fileData) => {
-        if (!isPreviewable(fileData.name)) return;
+    getFile();
+  }, [fileId]);
 
-        try {
-            setContentLoading(true);
-            const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileId), {
-                responseType: "blob",
-            });
+  const getFileExtension = (fileName) => {
+    if (!fileName) return "";
+    return fileName.split(".").pop().toLowerCase();
+  };
 
-            const extension = fileData.name.split('.').pop().toLowerCase();
-            const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-
-            if (imageTypes.includes(extension)) {
-                // For images, create object URL
-                const url = window.URL.createObjectURL(response.data);
-                setFileContent({ type: 'image', url });
-            } else {
-                // For text files, read as text
-                const text = await response.data.text();
-                setFileContent({ type: 'text', content: text });
-            }
-        } catch (error) {
-            console.error("Error loading file content:", error);
-            setFileContent(null);
-        } finally {
-            setContentLoading(false);
-        }
-    };
-
-    // Handle download
-    const handleDownload = async () => {
-        try {
-            const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileId), {
-                responseType: "blob",
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", file.name);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-
-        } catch (err) {
-            console.error("Download failed:", err);
-            alert("Sorry, the file could not be downloaded.");
-        }
-    };
-
-    // Open share modal
-    const openShareModal = () => {
-        setShareMode({
-            isOpen: true,
-            link: window.location.href,
-        });
-    };
-
-    const closeShareModal = () => {
-        setShareMode({
-            isOpen: false,
-            link: "",
-        });
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <p className="text-gray-600">Loading file...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="text-center p-8 bg-white rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-red-600">Error</h2>
-                    <p className="text-gray-600 mt-2">{error}</p>
-                </div>
-            </div>
-        );
-    }
-
+  const getFileUrl = () => {
     if (!file) return null;
+    // Log ALL fields in the file object for debugging
+    console.log("Complete file object:", file);
+    console.log("All available fields:", Object.keys(file));
+    console.log("Specific field values:", {
+      cloudinaryUrl: file.cloudinaryUrl,
+      downloadUrl: file.downloadUrl,
+      url: file.url,
+      fileUrl: file.fileUrl,
+      downloadUrl1: file.downloadUrl1,
+      name: file.name,
+      fileSize: file.fileSize,
+      size: file.size,
+    });
+    // Try multiple field names in order
+    const fileUrl =
+      file.cloudinaryUrl ||
+      file.downloadUrl ||
+      file.url ||
+      file.fileUrl ||
+      file.downloadUrl1;
+    console.log("Final selected URL:", fileUrl);
+    return fileUrl || null;
+  };
 
+  const handleDownload = async () => {
+    try {
+      const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileId), {
+        responseType: "blob",
+      });
+
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.name;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading:", error);
+      alert("Failed to download file");
+    }
+  };
+
+  const handleCopyLink = () => {
+    const shareLink = window.location.href;
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareWhatsApp = () => {
+    const shareLink = window.location.href;
+    // Use simplified message format that WhatsApp handles better
+    const fileName = file.name || "Check out this file";
+    const message = `${fileName}\n${shareLink}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    console.log("WhatsApp URL:", whatsappUrl);
+    window.open(whatsappUrl, "_blank");
+  };
+
+  const formatFileSize = (bytes) => {
+    // Debug logging
+    console.log("formatFileSize called with:", {
+      bytes,
+      fileSize: file?.fileSize,
+      size: file?.size,
+      allFileData: file
+    });
+    
+    const fileSize = bytes || file?.fileSize || file?.size || 0;
+    console.log("Using fileSize value:", fileSize);
+    
+    if (!fileSize || fileSize === 0) return "Unknown size";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(fileSize, k));
+    return Math.round((fileSize / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  if (isLoading) {
     return (
-        <div className="bg-gray-50 min-h-screen">
-            <header className="p-4 border-b bg-white">
-                <div className="container mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Share2 className="text-blue-600" />
-                        <span className="font-bold text-xl text-gray-800">CloudShare</span>
-                    </div>
-                    <button
-                        onClick={openShareModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg"
-                    >
-                        <Copy size={18} />
-                        Share Link
-                    </button>
-                </div>
-            </header>
-
-            <main className="container mx-auto p-4 md:p-8 flex justify-center">
-                <div className="w-full max-w-3xl">
-
-                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 text-center">
-
-                        <div className="flex justify-center mb-3">
-                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                                <File size={32} className="text-blue-500" />
-                            </div>
-                        </div>
-
-                        <h1 className="text-xl font-semibold text-gray-800 break-words">
-                            {file.name}
-                        </h1>
-
-                        <p className="text-sm text-gray-500 mt-1">
-                            {(file.size / 1024).toFixed(2)} KB
-                            <span className="mx-1">&bull;</span>
-                            Shared on {new Date(file.uploadedAt).toLocaleDateString()}
-                        </p>
-
-                        <div className="my-4">
-                            <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded">
-                                {file.type || "File"}
-                            </span>
-                        </div>
-
-                        <div className="flex justify-center gap-4 my-5">
-                            <button
-                                onClick={handleDownload}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-white rounded"
-                            >
-                                <Download size={16} />
-                                Download File
-                            </button>
-                        </div>
-
-                        {/* File Preview Section */}
-                        {isPreviewable(file.name) && contentLoading ? (
-                            <div className="my-5 p-4 bg-gray-100 rounded flex items-center justify-center">
-                                <p className="text-gray-600">Loading preview...</p>
-                            </div>
-                        ) : fileContent ? (
-                            <div className="my-5 border-t pt-5">
-                                <h3 className="text-base font-semibold text-left text-gray-800 mb-3">
-                                    File Preview
-                                </h3>
-                                {fileContent.type === 'image' ? (
-                                    <div className="flex justify-center bg-gray-100 rounded p-4">
-                                        <img 
-                                            src={fileContent.url} 
-                                            alt={file.name}
-                                            className="max-w-full max-h-96 rounded"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="bg-gray-900 text-gray-100 rounded p-4 overflow-auto max-h-96">
-                                        <pre className="text-sm font-mono whitespace-pre-wrap break-words">
-                                            {fileContent.content}
-                                        </pre>
-                                    </div>
-                                )}
-                            </div>
-                        ) : null}
-
-                        <hr className="my-5" />
-
-                        <div>
-                            <h3 className="text-base font-semibold text-left text-gray-800 mb-3">
-                                File Information
-                            </h3>
-
-                            <div className="text-left text-sm space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">File Name:</span>
-                                    <span className="text-gray-800 font-medium break-all">{file.name}</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">File Type:</span>
-                                    <span className="text-gray-800 font-medium">{file.type}</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">File Size:</span>
-                                    <span className="text-gray-800 font-medium">
-                                        {(file.size / 1024).toFixed(2)} KB
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Shared:</span>
-                                    <span className="text-gray-800 font-medium">
-                                        {new Date(file.uploadedAt).toLocaleDateString()}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    {/* <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center">
-                        <div className="flex justify-center mb-4">
-                            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                                <File size={40} className="text-blue-500" />
-                            </div>
-                        </div>
-
-                        <h1 className="text-2xl font-semibold text-gray-800 break-words">
-                            {file.name}
-                        </h1>
-
-                        <p className="text-sm text-gray-500 mt-2">
-                            {(file.size / 1024).toFixed(2)} KB
-                            <span className="mx-2">&bull;</span>
-                            Shared on {new Date(file.uploadedAt).toLocaleDateString()}
-                        </p>
-
-                        <div className="my-6">
-                            <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1 rounded">
-                                {file.type || "File"}
-                            </span>
-                        </div>
-
-                        <div className="flex justify-center gap-4 my-8">
-                            <button
-                                onClick={handleDownload}
-                                className="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded"
-                            >
-                                <Download size={18} />
-                                Download File
-                            </button>
-                        </div>
-
-                        <hr className="my-8" />
-
-                        <div>
-                            <h3 className="text-lg font-semibold text-left text-gray-800 mb-4">
-                                File Information
-                            </h3>
-
-                            <div className="text-left text-sm space-y-3">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">File Name:</span>
-                                    <span className="text-gray-800 font-medium break-all">{file.name}</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">File Type:</span>
-                                    <span className="text-gray-800 font-medium">{file.type}</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">File Size:</span>
-                                    <span className="text-gray-800 font-medium">{(file.size / 1024).toFixed(2)} KB</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Shared:</span>
-                                    <span className="text-gray-800 font-medium">
-                                        {new Date(file.uploadedAt).toLocaleDateString()}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
-
-                    <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
-                        <Info size={18} />
-                        <p className="text-sm">
-                            This file has been shared publicly. Anyone with this link can view it.
-                        </p>
-                    </div>
-                </div>
-            </main>
-
-            <LinkShareModal
-                isOpen={shareMode.isOpen}
-                onClose={closeShareModal}
-                shareLink={shareMode.link}   // ✅ Correct prop name
-            />
-
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-lg font-medium">Loading file...</p>
         </div>
+      </div>
     );
+  }
+
+  if (error || !file) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+        <div className="max-w-md text-center bg-white rounded-lg shadow-lg p-8">
+          <AlertCircle size={64} className="text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Error</h1>
+          <p className="text-gray-600 mb-6">{error || "File not found"}</p>
+          <a
+            href="/"
+            className="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg transition hover:bg-blue-700"
+          >
+            Go Home
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  const fileExt = getFileExtension(file.name);
+  const isPDF = fileExt === "pdf";
+  const isImage = ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
+    fileExt,
+  );
+  const fileUrl = getFileUrl();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3">
+                <FileText className="text-blue-600 flex-shrink-0" size={32} />
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-bold text-gray-900 truncate">
+                    {file.name}
+                  </h1>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {formatFileSize()} •{" "}
+                    {formatDate(file.createdAt || file.uploadedAt)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={handleShareWhatsApp}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+                title="Share via WhatsApp"
+              >
+                <Share2 size={18} />
+                <span className="hidden sm:inline text-sm">Share</span>
+              </button>
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg flex-shrink-0"
+              >
+                <Download size={20} />
+                <span className="hidden sm:inline">Download</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* PDF Viewer */}
+        {isPDF && fileUrl && (
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div className="bg-gray-100 p-3 border-b border-gray-200 flex items-center justify-between">
+              <p className="text-sm text-gray-600 font-medium">PDF Preview</p>
+              <div className="flex gap-2">
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={file.name}
+                  className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                >
+                  Download PDF
+                </a>
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                >
+                  Open in New Tab
+                </a>
+              </div>
+            </div>
+            <div className="relative bg-gray-50" style={{ height: "700px" }}>
+              {pdfLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-3"></div>
+                    <p className="text-gray-600">Loading PDF...</p>
+                  </div>
+                </div>
+              )}
+              <iframe
+                src={`${fileUrl}#toolbar=1&navpanes=0&scrollbar=1`}
+                title={file.name}
+                className="w-full h-full"
+                onLoad={() => {
+                  console.log("PDF iframe loaded successfully");
+                  setPdfLoading(false);
+                }}
+                onError={() => {
+                  console.error("PDF iframe failed to load. URL:", fileUrl);
+                  setPdfLoading(false);
+                }}
+                style={{ border: "none" }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Image Viewer */}
+        {isImage && fileUrl && (
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8 flex justify-center p-8">
+            <img
+              src={fileUrl}
+              alt={file.name}
+              className="max-h-96 object-contain"
+            />
+          </div>
+        )}
+
+        {/* Share Link Section */}
+        {fileUrl && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Share This File
+            </h3>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={window.location.href}
+                readOnly
+                className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700"
+              />
+              <button
+                onClick={handleCopyLink}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                  copied
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                }`}
+              >
+                <Copy size={18} />
+                {copied ? "Copied!" : "Copy Link"}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleShareWhatsApp}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+              >
+                <Share2 size={18} />
+                Share on WhatsApp
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* No File URL */}
+        {!fileUrl && (
+          <div className="bg-white rounded-lg shadow-lg p-12 text-center mb-8">
+            <AlertCircle size={64} className="text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Preview Not Available
+            </h3>
+            <p className="text-gray-500 mb-6">
+              The file preview could not be loaded. Please download to view.
+            </p>
+            <div className="bg-gray-50 p-4 rounded mb-6 text-left text-xs text-gray-600 max-h-48 overflow-auto">
+              <p className="font-semibold mb-2">Debug Info (check your browser console too):</p>
+              <p><strong>Available fields in response:</strong> {file ? Object.keys(file).join(", ") : "No file data"}</p>
+              <p><strong>File object:</strong> {JSON.stringify(file, null, 2)}</p>
+            </div>
+            <button
+              onClick={handleDownload}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              <Download size={18} />
+              Download File
+            </button>
+          </div>
+        )}
+
+        {/* File Info */}
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-8">
+            File Information
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label className="block text-gray-600 text-sm font-medium mb-2">
+                File Name
+              </label>
+              <p className="text-gray-900 font-semibold break-all">
+                {file.name}
+              </p>
+            </div>
+            <div>
+              <label className="block text-gray-600 text-sm font-medium mb-2">
+                File Type
+              </label>
+              <p className="text-gray-900 font-semibold">
+                {file.fileType || file.mimeType || `.${fileExt}`}
+              </p>
+            </div>
+            <div>
+              <label className="block text-gray-600 text-sm font-medium mb-2">
+                File Size
+              </label>
+              <p className="text-gray-900 font-semibold">{formatFileSize()}</p>
+            </div>
+            <div>
+              <label className="block text-gray-600 text-sm font-medium mb-2">
+                Shared Date
+              </label>
+              <p className="text-gray-900 font-semibold">
+                {formatDate(file.createdAt || file.uploadedAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PublicFileView;
-
-
-
-// import { useAuth } from "@clerk/clerk-react";
-// import axios from "axios";
-// import { useEffect, useState } from "react";
-// import { apiEndpoints } from "../util/apiEndpoints";
-// import { link } from "framer-motion/client";
-// import { Copy, Download, File, Info, Share2 } from "lucide-react";
-// import LinkShareModal from "../component/LinkShareModal";
-
-// const PublicFileView=()=>{
-//     const [file,setFile]=useState(null);
-//     const [error,setError]=useState(null);
-//     const [isLoading,setIsLoading]=useState(false);
-//     const [shareMode,setShareMode]=useState({
-//         isOpen:"false",
-//         link:""
-//     });
-//     const {getToken} = useAuth();
-//     const {fileId}=useParams();
-
-//     useEffect(()=>{
-//         const getFile= async ()=>{
-//             try{
-//                 //Re-added token fetching and authorization header
-//                 const res=await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId));
-//                 setFile(res.data);
-//                 setError(null);
-//             } catch(error){
-//                 console.error("Error fetchinmg file:",error);
-//                 setError("Could not retrieve file. The link may be invalid or the file may have been removed.");
-//             }finally{
-//                 setIsLoading(false);
-//             }
-//         };
-//         getFile();
-//     },[fileId,getToken]);
-
-//     //handle download
-//     const handleDownload= async ()=>{
-//         try{
-//             //this endpoints might also require a token depending on your backend setup
-//             const response=await Axis3D.get(apiEndpoints.DOWNLOAD_FILE(fileId),{
-//                 responseType:"blob",
-//             });
-
-//             const url=window.URL.createObjectURL(new Blob([response.data]));
-//             const link=document.createElement("a");
-//             link.href=url;
-//             link.setAttribute("download",file.name);
-//             document.body.appendChild(link);
-//             link.click();
-//             link.remove();
-//             window.URL.revokeObjectURL(url);
-
-//         } catch(err){
-//             console.error("Download failed:",err);
-//             alert("Sorry, the file could not be downloaded.");
-//         }
-//     };
-
-//     //open view 
-//     const openShareModal=()=>{
-//         setShareModal({
-//             isOpen: true,
-//             link:window.location.href,
-//         });
-//     };
-
-//     const closeShareModal=()=>{
-//         setShareModal({
-//             isOpen:false,
-//             link:"",
-//         });
-//     };
-
-//     if(isLoading){
-//         return(
-//             <div className="flex justify-center items-center h-screen bg-gray-50">
-//                 <p className="text-gray-600">Loading file...</p>
-//             </div>
-//         );
-//     }
-
-//     if(error){
-//         return(
-//             <div className="flex justify-center items-center h-screen bg-gray-50">
-//                 <div className="text-center p-8 bg-white rounded-lg shadow-md">
-//                     <h2 className="text-xl font-semibold text-red-600">Error</h2>
-//                     <p className="text-gray-600 mt-2">{error}</p>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     if(!file) return null;
-    
-//     return(
-//         <div className="bg-gray-50 min-h-screen">
-//             <header className="p-4border-b bg-white">
-//                 <div className="container mx-auto flex justify-between items-center">
-//                     <div className="flex items-center gap-2">
-//                         <Share2 className="text-blue-600"/>
-//                         <span className="font-bold text-xl text-gray-800">
-//                             CloudShare
-//                         </span>
-//                     </div>
-//                     <button
-//                     onClick={openShareModal}
-//                     className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg">
-//                         <Copy size={18}/> 
-//                         Share Link
-//                     </button>
-//                 </div>
-//             </header>
-//             {/* Main Content */}
-//             <main className="container mx-auto p-4 md:p-8 flex justify-center">
-//                 <div className="w-full max-w-3xl">
-//                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center">
-//                         <div className="flex justify-center mb-4">
-//                             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-//                                 <File size={40} className="text-blue-500"/>
-//                             </div>
-//                         </div>
-//                         <h1 className="text-2xl font-semibold text-gray-800 break-words">
-//                             {file.name}
-//                         </h1>
-//                         <p className="text-sm text-gray-500 mt-2">
-//                             {(file.size/1024).toFixed(2)} KB<span className="mx-2">&bull;</span>
-//                             Share on {new Date(file.uploadedAt).toLocaleDateString()}
-//                         </p>
-//                         <div className="my-6">
-//                             <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1 rounded">
-//                                 {file.type || "File"}
-//                             </span>
-//                         </div>
-//                         <div className="flex justify-center gap-4 my-8">
-//                             <button
-//                                 onClick={handleDownload}
-//                                 className="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded"
-//                             >
-//                                 <Download size={18}/>
-//                                 Download File
-//                             </button>
-//                         </div>
-
-//                         <hr className="my-8"/>
-
-//                         <div>
-//                             <h3 className="text-lg font-semibold text-left text-gray-800 mb-4">
-//                                 File Information
-//                             </h3>
-//                             <div className="text-left text-sm space-y-3">
-//                                 <div className="flex justify-between">
-//                                     <span className="text-gray-500">
-//                                         File Name
-//                                     </span>
-//                                     <span className="text-gray-500 font-medium break-all">
-//                                         {file.name}
-//                                     </span>
-//                                 </div>
-//                                 <div className="flex justify-between">
-//                                     <span className="text-gray-500">File Type:</span>
-//                                     <span className="text-gray-500 font-medium">{file.type}</span>
-//                                 </div>
-//                                 <div className="flex justify-between">
-//                                     <span className="text-gray-500">File Size:</span>
-//                                     <span className="text-gray-500 font-medium">{(file.size/1024).toFixed(2)} KB</span>
-//                                 </div>
-//                                 <div className="flex justify-between">
-//                                     <span className="text-gray-500">Shared:</span>
-//                                     <span className="text-gray-800 font-medium">
-//                                         {new Date(file.uploadedAt).toLocaleDateString()}
-//                                     </span>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                     <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
-//                         <Info size={18}/>
-//                         <p className="text-sm">
-//                             This file has been shared publicly, Anyone with this link can view
-//                         </p>
-//                     </div>
-//                 </div>
-//             </main>
-//             <LinkShareModal
-//             isOpen={LinkShareModal.isOpen}
-//             onClose={closeShareModal}
-//             link={LinkShareModal.link}
-//             title="Share File"
-//             />
-//         </div>
-//     )
-// }
-// export default PublicFileView;
