@@ -99,7 +99,7 @@ const App = () => {
             </>
           }
         />
-        <Route path="file/:fileId" 
+        <Route path="/file/:fileId" 
         element={
           <>
           <PublicFileView/>

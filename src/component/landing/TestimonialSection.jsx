@@ -15,7 +15,7 @@ const TestimonialSection=()=>{
                 </div>
                 <div className="mt-16 grid gap-8 lg:grid-cols-3">
                     {testimonials.map((testimonial,index)=>(
-                        <div className="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-500 hover:scale-105">
+                        <div key={`${testimonial.name}-${index}`} className="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-500 hover:scale-105">
                             <div className="p-8">
                                 <div className="flex items-center">
                                     <div className="flex-shrink-0 h-12 w-12">

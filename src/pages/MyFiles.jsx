@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import { Copy, Download, Eye, File, Globe, Grid, List, Lock, Trash2, Image, VideoIcon, Music, FileText, FileIcon  } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import toast from "react-hot-toast";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FileCard from "../component/FileCard";
 import { apiEndpoints } from "../util/apiEndpoints";
 import ConfirmationDialog from "../component/ConfirmationDialog";
@@ -21,7 +21,7 @@ const MyFiles=()=>{
 
 
     //fetching the files for a logedIn user
-    const fetchFiles=async ()=>{
+    const fetchFiles=useCallback(async ()=>{
         try {
         const token = await getToken();
         const response = await axios.get(apiEndpoints.FETCH_FILES,
@@ -35,39 +35,47 @@ const MyFiles=()=>{
             console.error("Error fetching files from the server:", error);
             toast.error('Error Fetching the files from the server: ',error.message);
         }
-    }
+    }, [getToken]);
 
     //Toggles the public/private status of a file
     const togglePublic = async (fileToUpdate)=>{
         try{
             const token=await getToken();
-            await axios.patch(apiEndpoints.TOGGLE_FILE
-                (fileToUpdate.id),{},{headers:{Authorization: `Bearer ${token}`}});
-            setFiles(files.map((file)=>file.id===fileToUpdate.id ? {...file,isPublic:!file.isPublic}: file))
+            await axios.patch(
+                apiEndpoints.TOGGLE_FILE(fileToUpdate.id),
+                {},
+                {headers:{Authorization: `Bearer ${token}`}},
+            );
+            setFiles((prevFiles)=>prevFiles.map((file)=>file.id===fileToUpdate.id ? {...file,isPublic:!file.isPublic}: file));
         }catch (error){
             console.error('Error toggling file status',error);
             toast.error('Error toggling file status: ',error.message);
         }
     }
 
-    //handle file download
+    //handle file download - direct download from Cloudinary URL
     const handleDownload = async (file) => {
         try {
-            const token = await getToken();
-            const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(file.id), {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: "blob", // ✅ important for files
-            });
+            // File object contains cloudinaryUrl from the backend
+            // Use it directly to download from Cloudinary CDN
+            const fileUrl = file.cloudinaryUrl || file.fileLocation;
+            if (!fileUrl) {
+                toast.error("File URL not available");
+                return;
+            }
 
-            // Create a blob URL and trigger download
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+            // Add Cloudinary download flag to force attachment download instead of opening
+            const downloadUrl = fileUrl.replace('/upload/', '/upload/fl_attachment/');
+
+            // Create a temporary link and trigger download
             const link = document.createElement("a");
-            link.href = url;
+            link.href = downloadUrl;
             link.setAttribute("download", file.name);
             document.body.appendChild(link);
             link.click();
             link.remove();
-            window.URL.revokeObjectURL(url);
+            
+            toast.success("Download started!");
         } catch (error) {
             console.error("Download failed", error);
             toast.error("Error downloading file: " + error.message);
@@ -152,7 +160,7 @@ const MyFiles=()=>{
 
     useEffect(()=>{
         fetchFiles();
-    },[getToken]);
+    },[fetchFiles]);
 
 
     const getFileIcon = (file) => {

@@ -19,16 +19,17 @@ const Modal = ({
     md: "max-w-md",
     lg: "max-w-lg",
   };
+  const MotionDiv = motion.div;
 
   return (
     <AnimatePresence>
-      <motion.div
+      <MotionDiv
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <motion.div
+        <MotionDiv
           className={`bg-white rounded-xl shadow-xl w-full ${sizeClasses[size]} p-6 relative`}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -64,8 +65,8 @@ const Modal = ({
               {confirmText}
             </button>
           </div>
-        </motion.div>
-      </motion.div>
+        </MotionDiv>
+      </MotionDiv>
     </AnimatePresence>
   );
 };

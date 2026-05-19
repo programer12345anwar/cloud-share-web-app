@@ -123,8 +123,8 @@ const FileCard = ({
               href={`/file/${file.id}`}
               title="View File"
               target="_blank"
-              rel="nonreferrer"
-              className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors text-gray-700 hover: text-gray-900"
+              rel="noreferrer"
+              className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors text-gray-700 hover:text-gray-900"
             >
               <Eye size={18} />
             </a>

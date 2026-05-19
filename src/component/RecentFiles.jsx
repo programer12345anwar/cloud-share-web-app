@@ -16,6 +16,8 @@ import { useAuth } from "@clerk/clerk-react";
 const RecentFiles = ({ files }) => {
   const { getToken } = useAuth();
 
+  const resolveFileId = (file) => file?.id || file?._id || "";
+
   const formatSize = (bytes) => {
     if (!bytes) return "--";
     const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -62,28 +64,23 @@ const RecentFiles = ({ files }) => {
     }
   };
 
-  const toggleSharing = async (fileId, currentStatus) => {
-  try {
-    const token = await getToken();
-    console.log("Using token:", token);
-    console.log("Toggling file:", fileId, "From:", currentStatus);
-
-    const response = await axios.patch(
-      apiEndpoints.TOGGLE_FILE(fileId),
-      { status: currentStatus === "private" ? "public" : "private" },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    console.log("Toggle response:", response.data);
-
-    window.location.reload();
-  } catch (error) {
-    console.error("Share toggle error:", error.response?.data || error.message);
-  }
-};
-
+  const toggleSharing = async (fileId) => {
+    if (!fileId) return;
+    try {
+      const token = await getToken();
+      await axios.patch(
+        apiEndpoints.TOGGLE_FILE(fileId),
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      window.location.reload();
+    } catch (error) {
+      console.error("Share toggle error:", error.response?.data || error.message);
+    }
+  };
 
   const copyLink = (fileId) => {
+    if (!fileId) return;
     const link = `${window.location.origin}/file/${fileId}`;
     navigator.clipboard.writeText(link);
     alert("Link copied to clipboard!");
@@ -109,6 +106,7 @@ const RecentFiles = ({ files }) => {
 
           <tbody>
             {files.map((file) => {
+              const fileId = resolveFileId(file);
               const status =
                 file.shareStatus ||
                 (file.isPublic ? "public" : "private") ||
@@ -116,7 +114,7 @@ const RecentFiles = ({ files }) => {
 
               return (
                 <tr
-                  key={file._id || file.id || file.fileName}
+                  key={fileId || file.fileName}
                   className="border-b last:border-none"
                 >
                   <td className="py-3 flex items-center gap-3 max-w-[240px]">
@@ -145,14 +143,16 @@ const RecentFiles = ({ files }) => {
                     {status === "public" ? (
                       <div className="flex items-center gap-3">
                         <button
-                          onClick={() => toggleSharing(file._id, "public")}
+                          onClick={() => toggleSharing(fileId)}
+                          disabled={!fileId}
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full flex items-center gap-1 text-sm"
                         >
                           <Unlock size={14} /> Public
                         </button>
 
                         <button
-                          onClick={() => copyLink(file._id)}
+                          onClick={() => copyLink(fileId)}
+                          disabled={!fileId}
                           className="p-1 hover:bg-gray-200 rounded"
                         >
                           <Copy size={15} />
@@ -160,7 +160,8 @@ const RecentFiles = ({ files }) => {
                       </div>
                     ) : (
                       <button
-                        onClick={() => toggleSharing(file._id, "private")}
+                        onClick={() => toggleSharing(fileId)}
+                        disabled={!fileId}
                         className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full flex items-center gap-1 text-sm"
                       >
                         <Lock size={14} /> Private
@@ -319,6 +320,5 @@ export default RecentFiles;
 // };
 
 // export default RecentFiles;
-
 
 

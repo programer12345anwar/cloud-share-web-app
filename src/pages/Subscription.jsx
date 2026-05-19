@@ -97,7 +97,7 @@ const Subscription = () => {
     };
 
     fetchUserCredits();
-  }, [getToken]);
+  }, [getToken, setCredits]);
 
   // Purchase Handler
   const handlePurchase = async (plan) => {

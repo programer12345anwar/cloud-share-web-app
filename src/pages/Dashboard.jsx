@@ -197,7 +197,7 @@
 
 import { useAuth } from "@clerk/clerk-react";
 import DashboardLayout from "../layout/DashboardLayout.jsx";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { UserCreditsContext } from "../context/UserCreditsContext.jsx";
 import axios from "axios";
 import { apiEndpoints } from "../util/apiEndpoints.js";
@@ -219,7 +219,8 @@ const Dashboard = () => {
   const MAX_FILES = 5;
 
   // Fetch recent files
-  const fetchRecentFiles = async () => {
+  const fetchRecentFiles = useCallback(async () => {
+    setLoading(true);
     try {
       const token = await getToken();
 
@@ -234,12 +235,14 @@ const Dashboard = () => {
       setFiles(sortedFiles);
     } catch (error) {
       console.error("Error fetching recent files:", error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [getToken]);
 
   useEffect(() => {
     fetchRecentFiles();
-  }, [getToken]);
+  }, [fetchRecentFiles]);
 
   // File selection
   const handleFileChange = (e) => {
@@ -360,4 +363,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

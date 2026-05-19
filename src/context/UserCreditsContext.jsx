@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { createContext, useCallback, useEffect, useState } from "react";
@@ -8,14 +9,12 @@ export const UserCreditsContext = createContext();
 
 export const UserCreditsProvider = ({ children }) => {
     const [credits, setCredits] = useState(5);
-    const [loading, setLoading] = useState(false);
     const { getToken, isSignedIn } = useAuth();
 
   // Fetch user credits
     const fetchUserCredits = useCallback(async () => {
     if (!isSignedIn) return;
 
-    setLoading(true);
     try {
         const token = await getToken();
         const response = await axios.get(apiEndpoints.GET_CREDITS, {
@@ -29,8 +28,6 @@ export const UserCreditsProvider = ({ children }) => {
         }
     } catch (error) {
         console.error("Error fetching credits:", error);
-    } finally {
-        setLoading(false);
     }
     }, [getToken, isSignedIn]);
 

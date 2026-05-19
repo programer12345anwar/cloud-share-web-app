@@ -1,5 +1,4 @@
 import axios from "axios";
-import { apiEndpoints } from "./apiEndpoints";
 
 let networkErrorCount = 0;
 const MAX_NETWORK_ERRORS = 3; // Show banner only after multiple failures

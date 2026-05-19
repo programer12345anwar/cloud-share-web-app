@@ -79,8 +79,8 @@ export const testimonials = [
   //   company: "TechSolutions Ltd.",
   //   image: "https://randomuser.me/api/portraits/women/65.jpg",
   //   quote: "Managing project files across multiple teams used to be a nightmare until we found CloudShare.",
-  //   rating: 4
-//   }
+  //   rating: 4
+  // }
 ];
 
 

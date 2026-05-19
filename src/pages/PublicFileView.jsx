@@ -14,11 +14,15 @@ const PublicFileView = () => {
   const { fileId } = useParams();
 
   useEffect(() => {
+    if (!fileId) {
+      setError("Invalid file link.");
+      return;
+    }
+
     const getFile = async () => {
       try {
         setIsLoading(true);
         const res = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId));
-        console.log("Full file response:", res.data);
         setFile(res.data);
         setError(null);
       } catch (error) {
@@ -39,42 +43,29 @@ const PublicFileView = () => {
 
   const getFileUrl = () => {
     if (!file) return null;
-    // Log ALL fields in the file object for debugging
-    console.log("Complete file object:", file);
-    console.log("All available fields:", Object.keys(file));
-    console.log("Specific field values:", {
-      cloudinaryUrl: file.cloudinaryUrl,
-      downloadUrl: file.downloadUrl,
-      url: file.url,
-      fileUrl: file.fileUrl,
-      downloadUrl1: file.downloadUrl1,
-      name: file.name,
-      fileSize: file.fileSize,
-      size: file.size,
-    });
-    // Try multiple field names in order
-    const fileUrl =
-      file.cloudinaryUrl ||
-      file.downloadUrl ||
-      file.url ||
-      file.fileUrl ||
-      file.downloadUrl1;
-    console.log("Final selected URL:", fileUrl);
-    return fileUrl || null;
+
+    // Backward compatible support for older records where URL was stored in fileLocation.
+    return file.cloudinaryUrl || file.fileLocation || null;
   };
 
   const handleDownload = async () => {
     try {
-      const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileId), {
-        responseType: "blob",
-      });
+      const sourceUrl = getFileUrl();
 
-      const url = URL.createObjectURL(response.data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = file.name;
-      link.click();
-      URL.revokeObjectURL(url);
+      if (sourceUrl) {
+        const downloadUrl = sourceUrl.replace(
+          "/upload/",
+          "/upload/fl_attachment/",
+        );
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = file.name;
+        link.click();
+        return;
+      }
+
+      // Fallback to backend redirect endpoint when direct URL is unavailable.
+      window.open(apiEndpoints.DOWNLOAD_FILE(fileId), "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Error downloading:", error);
       alert("Failed to download file");
@@ -99,21 +90,14 @@ const PublicFileView = () => {
   };
 
   const formatFileSize = (bytes) => {
-    // Debug logging
-    console.log("formatFileSize called with:", {
-      bytes,
-      fileSize: file?.fileSize,
-      size: file?.size,
-      allFileData: file
-    });
-    
     const fileSize = bytes || file?.fileSize || file?.size || 0;
-    console.log("Using fileSize value:", fileSize);
-    
     if (!fileSize || fileSize === 0) return "Unknown size";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(fileSize, k));
+    const i = Math.min(
+      Math.floor(Math.log(fileSize) / Math.log(k)),
+      sizes.length - 1,
+    );
     return Math.round((fileSize / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
 
@@ -248,11 +232,9 @@ const PublicFileView = () => {
                 title={file.name}
                 className="w-full h-full"
                 onLoad={() => {
-                  console.log("PDF iframe loaded successfully");
                   setPdfLoading(false);
                 }}
                 onError={() => {
-                  console.error("PDF iframe failed to load. URL:", fileUrl);
                   setPdfLoading(false);
                 }}
                 style={{ border: "none" }}
@@ -319,11 +301,6 @@ const PublicFileView = () => {
             <p className="text-gray-500 mb-6">
               The file preview could not be loaded. Please download to view.
             </p>
-            <div className="bg-gray-50 p-4 rounded mb-6 text-left text-xs text-gray-600 max-h-48 overflow-auto">
-              <p className="font-semibold mb-2">Debug Info (check your browser console too):</p>
-              <p><strong>Available fields in response:</strong> {file ? Object.keys(file).join(", ") : "No file data"}</p>
-              <p><strong>File object:</strong> {JSON.stringify(file, null, 2)}</p>
-            </div>
             <button
               onClick={handleDownload}
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"

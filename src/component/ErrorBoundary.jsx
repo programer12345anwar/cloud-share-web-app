@@ -11,7 +11,7 @@ class ErrorBoundary extends React.Component {
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -54,7 +54,7 @@ class ErrorBoundary extends React.Component {
               We encountered an unexpected error. Please try again or contact support if the problem persists.
             </p>
 
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <div className="bg-red-50 border border-red-200 rounded p-3 mb-6">
                 <p className="text-sm font-mono text-red-800 break-all">
                   {this.state.error.toString()}
